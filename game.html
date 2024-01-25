@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Named Players Game</title>
+  <style>
+    #game-board {
+      position: relative;
+      width: 400px;
+      height: 320px;
+      border: 1px solid #000;
+      overflow: hidden;
+    }
+
+    .player {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background-color: red;
+      border-radius: 50%;
+      transition: transform 0.2s ease-out, width 0.2s ease-out, height 0.2s ease-out;
+    }
+
+    #add-player-btn {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="game-board">
+  <!-- Players will be added here dynamically -->
+</div>
+
+<button id="add-player-btn">Thêm Player</button>
+
+<script>
+  const boardWidth = 400;
+  const boardHeight = 320;
+
+  let players = [];
+  let score = 0;
+
+  const addPlayerButton = document.getElementById('add-player-btn');
+  const gameBoard = document.getElementById('game-board');
+
+  addPlayerButton.addEventListener('click', addPlayer);
+
+  function addPlayer() {
+    const player = document.createElement('div');
+    player.classList.add('player');
+    player.setAttribute('id', `player-${players.length + 1}`);
+    gameBoard.appendChild(player);
+
+    players.push(player);
+    updatePlayerPosition(player);
+  }
+
+  function updatePlayerPosition(player) {
+    const maxX = boardWidth - player.offsetWidth;
+    const maxY = boardHeight - player.offsetHeight;
+
+    const randomX = Math.floor(Math.random() * maxX);
+    const randomY = Math.floor(Math.random() * maxY);
+
+    player.style.transform = `translate(${randomX}px, ${randomY}px)`;
+  }
+
+  function checkCollision() {
+    for (let i = 0; i < players.length; i++) {
+      for (let j = i + 1; j < players.length; j++) {
+        const player1 = players[i];
+        const player2 = players[j];
+
+        const dx = player1.offsetLeft - player2.offsetLeft;
+        const dy = player1.offsetTop - player2.offsetTop;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < player1.offsetWidth / 2 + player2.offsetWidth / 2) {
+          handleCollision(player1, player2);
+        }
+      }
+    }
+  }
+
+  function handleCollision(player1, player2) {
+    const radiusIncrease = 1;
+
+    if (player1.offsetWidth > player2.offsetWidth) {
+      score += 4;
+      player2.style.width = `${player2.offsetWidth + radiusIncrease +1}px`;
+      player2.style.height = `${player2.offsetHeight + radiusIncrease +1}px`;
+      console.log(`Player ${player1.id} scored 4 points by colliding with Player ${player2.id}`);
+    } else {
+      score += 1;
+      player1.style.width = `${player1.offsetWidth + radiusIncrease+1}px`;
+      player1.style.height = `${player1.offsetHeight + radiusIncrease + 1}px`;
+      console.log(`Player ${player2.id} scored 1 point by colliding with Player ${player1.id}`);
+    }
+
+    console.log('Total Score:', score);
+  }
+
+  function movePlayers() {
+    players.forEach(player => {
+      updatePlayerPosition(player);
+    });
+
+    checkCollision();
+  }
+
+  setInterval(movePlayers, 2000);
+</script>
+
+</body>
+</html>
